@@ -2,7 +2,9 @@
 
 #include "debug.h"
 
-Core::Core(int width, int height){
+Core::Core(int width, int height):
+    m_screenResolution(glm::ivec2(width, height))
+{
     m_shader = ShaderLoader::createShaderProgram("Shaders/gerstnerWave.vert", "Shaders/gerstnerWave.frag");
     Debug::checkGLError();
     m_camera = std::make_unique<Camera>(width, height, glm::vec3(0, 5, -5), glm::vec3(0, -1, 1), glm::vec3(0, 1, 0), 1.f, 0.1f, 100.f);
@@ -26,8 +28,8 @@ int Core::update(double seconds){
 int Core::draw(){
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    m_player->draw();
-    m_level->draw(m_player);
+    m_player->draw(glm::vec2(m_screenResolution.x * m_unitsY/m_screenResolution.y, m_unitsY));
+    m_level->draw(m_player, glm::vec2(m_screenResolution.x * m_unitsY/m_screenResolution.y, m_unitsY));
     return 0;
 }
 
@@ -55,9 +57,9 @@ void Core::scrollEvent(double distance){
 }
 
 void Core::framebufferResizeEvent(int width, int height){
-
+    glViewport(0, 0, width, height);
 }
 
 void Core::windowResizeEvent(int width, int height){
-
+    m_screenResolution = glm::ivec2(width, height);
 }

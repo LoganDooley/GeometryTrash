@@ -25,10 +25,10 @@ Level::Level():
 
     float startPos = 5;
     for(int i = 0; i<10; i++){
-        m_spikes.push_back({glm::dvec2(startPos, 0)});
-        m_spikes.push_back({glm::dvec2(startPos+1, 0)});
-        m_spikes.push_back({glm::dvec2(startPos+2, 0)});
-        m_spikes.push_back({glm::dvec2(startPos+3.25, 2)});
+        m_spikes.push_back({glm::dvec2(startPos, -4)});
+        m_spikes.push_back({glm::dvec2(startPos+1, -4)});
+        m_spikes.push_back({glm::dvec2(startPos+2, -4)});
+        m_spikes.push_back({glm::dvec2(startPos+3.25, -2)});
         startPos += 4.5;
     }
 }
@@ -49,10 +49,10 @@ void Level::checkCollisions(std::shared_ptr<Player> player){
     player->resolveCollision(collision);
 }
 
-void Level::draw(std::shared_ptr<Player> player){
+void Level::draw(std::shared_ptr<Player> player, glm::vec2 screenDim){
     glUseProgram(m_levelShader);
     glUniform2f(glGetUniformLocation(m_levelShader, "playerPos"), player->getPos().x, player->getPos().y);
-    glUniform2f(glGetUniformLocation(m_levelShader, "screenDim"), 6.4, 4.8);
+    glUniform2f(glGetUniformLocation(m_levelShader, "screenDim"), screenDim.x, screenDim.y);
     glBindVertexArray(m_spikeVao);
     for(int i = 0; i<m_spikes.size(); i++){
         glUniform2f(glGetUniformLocation(m_levelShader, "objPos"), m_spikes[i].m_pos.x, m_spikes[i].m_pos.y);

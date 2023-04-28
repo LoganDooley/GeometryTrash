@@ -16,7 +16,7 @@ public:
 
     void update(double dt);
     void setInput(bool input);
-    void draw();
+    void draw(glm::vec2 screenDim);
 
     glm::dvec2 getPos() const{
         return m_pos;
@@ -38,7 +38,7 @@ private:
     bool m_grounded = true;
     bool m_input = false;
     bool m_flippedGravity = false;
-    glm::dvec2 m_pos = glm::dvec2(0, 0);
+    glm::dvec2 m_pos = glm::dvec2(0, -4);
     glm::dvec2 m_vel = glm::dvec2(1, 0);
     glm::dvec2 m_accel = glm::dvec2(0, 0);
 
@@ -49,4 +49,5 @@ private:
 
     AABB m_hitbox;
     float m_theta = 0.5;
+    float m_angularVelocity = 0.75;
 };

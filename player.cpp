@@ -49,19 +49,35 @@ void Player::update(double dt){
         break;
     }
 
-    if(m_pos.y < 0){
-        m_pos.y = 0;
+    if(m_pos.y < -4 && !m_flippedGravity){
+        m_pos.y = -4;
         m_vel.y = 0;
         m_grounded = true;
+        m_theta = M_PI/2 * (int(ceilf(m_theta/(M_PI/2))) % 4);
+    }
+    else if(m_pos.y > 4 && m_flippedGravity){
+        m_pos.y = 4;
+        m_vel.y = 0;
+        m_grounded = true;
+        m_theta = M_PI/2 * (int(floor(m_theta/(M_PI/2))) % 4);
     }
 
-    m_theta += dt;
+    if(!m_grounded){
+        if(!m_flippedGravity){
+            m_theta += m_angularVelocity * dt;
+        }
+        else{
+            m_theta -= m_angularVelocity * dt;
+        }
+    }
 }
 
-void Player::draw(){
+void Player::draw(glm::vec2 screenDim){
     glUseProgram(m_playerShader);
     glUniform2f(glGetUniformLocation(m_playerShader, "playerPos"), 0, m_pos.y);
-    glUniform2f(glGetUniformLocation(m_playerShader, "screenDim"), 6.4, 4.8);
+    glUniform2f(glGetUniformLocation(m_playerShader, "screenDim"), screenDim.x, screenDim.y);
+    glUniform2f(glGetUniformLocation(m_playerShader, "xRot"), cosf(m_theta), sinf(m_theta));
+    glUniform2f(glGetUniformLocation(m_playerShader, "yRot"), -sinf(m_theta), cosf(m_theta));
     glUniform1f(glGetUniformLocation(m_playerShader, "theta"), m_theta);
     glBindVertexArray(m_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -69,14 +85,14 @@ void Player::draw(){
 }
 
 void Player::resolveCollision(glm::dvec2 collision){
-    std::cout<<collision.x<<" "<<collision.y<<std::endl;
+    //std::cout<<collision.x<<" "<<collision.y<<std::endl;
     if(collision.x != 0 || collision.y != 0){
-        std::cout<<"Collision"<<std::endl;
+        //std::cout<<"Collision"<<std::endl;
         m_gamemode = Cube;
         m_grounded = true;
         m_input = false;
-        m_flippedGravity = false;
-        m_pos = glm::dvec2(0, 0);
+        m_flippedGravity = true;
+        m_pos = glm::dvec2(0, -4);
         m_vel = glm::dvec2(1, 0);
         m_accel = glm::dvec2(0, 0);
     }

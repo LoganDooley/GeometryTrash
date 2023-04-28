@@ -30,9 +30,12 @@ private:
     std::unique_ptr<Camera> m_camera;
     std::shared_ptr<Player> m_player;
     std::shared_ptr<Level> m_level;
+    glm::ivec2 m_screenResolution;
 
     bool m_mouseDown = false;
     std::set<int> m_keysDown = std::set<int>();
+
+    float m_unitsY = 4.8;
 
     double m_dtMultiplier = 7.5;
 };

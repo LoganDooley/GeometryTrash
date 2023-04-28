@@ -18,7 +18,7 @@ public:
     ~Level();
 
     void checkCollisions(std::shared_ptr<Player> player);
-    void draw(std::shared_ptr<Player> player);
+    void draw(std::shared_ptr<Player> player, glm::vec2 screenDim);
 
 private:
     std::vector<Spike> m_spikes;
