@@ -37,5 +37,5 @@ private:
 
     float m_unitsY = 4.8;
 
-    double m_dtMultiplier = 7.5;
+    double m_dtMultiplier = 7;
 };

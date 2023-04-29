@@ -4,7 +4,11 @@
 #include "shaderloader.h"
 #include "aabb.h"
 
-enum Gamemode{
+struct Portal;
+
+struct Orb;
+
+enum class Gamemode{
     Cube, Ship, Ball, Wave
 };
 
@@ -27,6 +31,8 @@ public:
     }
 
     void resolveCollision(glm::dvec2 collision);
+    void portalInteraction(Portal portal);
+    bool orbInteraction(Orb orb);
 
 private:
     void updateCube(double dt);
@@ -34,9 +40,10 @@ private:
     void updateBall(double dt);
     void updateWave(double dt);
 
-    Gamemode m_gamemode = Cube;
+    Gamemode m_gamemode = Gamemode::Cube;
     bool m_grounded = true;
     bool m_input = false;
+    bool m_orbInput = false;
     bool m_flippedGravity = false;
     glm::dvec2 m_pos = glm::dvec2(0, -4);
     glm::dvec2 m_vel = glm::dvec2(1, 0);

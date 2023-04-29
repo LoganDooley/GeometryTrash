@@ -31,6 +31,7 @@ add_executable(${PROJECT_NAME}
     player.cpp
     level.cpp
     aabb.cpp
+    oobb.cpp
 
     window.h
     core.h
@@ -40,6 +41,7 @@ add_executable(${PROJECT_NAME}
     player.h
     level.h
     aabb.h
+    oobb.h
 
     External/stb_image.h
     External/stb_image_write.h
