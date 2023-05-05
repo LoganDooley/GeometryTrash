@@ -1,7 +1,8 @@
 #include "level.h"
 #include "debug.h"
 
-Level::Level()
+Level::Level(std::shared_ptr<Settings> settings):
+    m_settings(settings)
 {
     GLdouble spikeData[6] = {
         -0.5, -0.5,
@@ -14,6 +15,25 @@ Level::Level()
     glGenBuffers(1, &m_spikeVbo);
     glBindBuffer(GL_ARRAY_BUFFER, m_spikeVbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(spikeData), spikeData, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(GLdouble), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    GLdouble blockData[12] = {
+        -0.5, -0.5,
+        0.5, -0.5,
+        0.5, 0.5,
+        0.5, 0.5,
+        -0.5, 0.5,
+        -0.5, -0.5
+    };
+
+    glGenVertexArrays(1, &m_blockVao);
+    glBindVertexArray(m_blockVao);
+    glGenBuffers(1, &m_blockVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, m_blockVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(blockData), blockData, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(GLdouble), 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -60,54 +80,10 @@ Level::Level()
     m_levelShader = ShaderLoader::createShaderProgram("Shaders/level.vert", "Shaders/level.frag");
     Debug::checkGLError();
 
-    float currPos = 5;
-    m_spikes.emplace_back(glm::dvec2(currPos, -2), false, true);
-    m_spikes.emplace_back(glm::dvec2(currPos+1, -4), false, false);
-    m_spikes.emplace_back(glm::dvec2(currPos+2, -4), false, false);
-    m_spikes.emplace_back(glm::dvec2(currPos+3, -4), false, false);
-    m_spikes.emplace_back(glm::dvec2(currPos+4, -2), false, true);
-    currPos += 10;
-
-    m_orbs.emplace_back(glm::dvec2(currPos, -2), OrbType::Blue, false, false);
-
-    currPos += 3;
-
-    m_spikes.emplace_back(glm::dvec2(currPos, 2), false, false);
-    m_spikes.emplace_back(glm::dvec2(currPos+1, 4), false, true);
-    m_spikes.emplace_back(glm::dvec2(currPos+2, 4), false, true);
-    m_spikes.emplace_back(glm::dvec2(currPos+3, 4), false, true);
-    currPos += 10;
-
-    m_orbs.emplace_back(glm::dvec2(currPos, 2), OrbType::Red, false, false);
-
-    currPos += 3;
-
-    m_orbs.emplace_back(glm::dvec2(currPos, -2), OrbType::Green, false, false);
-
-    currPos += 3;
-
-    m_portals.emplace_back(glm::dvec2(currPos, 0), PortalType::Ship, false, false);
-
-    currPos += 5;
-    for(int i = 0; i<5; i++){
-        m_spikes.emplace_back(glm::dvec2(currPos, -1), false, false);
-        m_spikes.emplace_back(glm::dvec2(currPos, 1), false, true);
-        currPos += 1;
-    }
-
-    currPos += 3;
-    for(int i = 0; i<5; i++){
-        m_spikes.emplace_back(glm::dvec2(currPos, -2), false, false);
-        m_spikes.emplace_back(glm::dvec2(currPos, 0), false, true);
-        currPos += 1;
-    }
-
-    currPos += 8;
-    for(int i = 0; i<5; i++){
-        m_spikes.emplace_back(glm::dvec2(currPos, 1), false, false);
-        m_spikes.emplace_back(glm::dvec2(currPos, 3), false, true);
-        currPos += 1;
-    }
+    //m_portals.emplace_back(glm::dvec2(5, -3), PortalType::Wave, false, false);
+    m_spikes.emplace_back(glm::dvec2(8, -4), false, false);
+    m_spikes.emplace_back(glm::dvec2(9, -4), false, false);
+    m_blocks.emplace_back(glm::dvec2(10, -4), false, false);
 }
 
 Level::~Level()
@@ -116,36 +92,54 @@ Level::~Level()
 }
 
 void Level::checkCollisions(std::shared_ptr<Player> player){
-    glm::dvec2 collision = glm::dvec2(0, 0);
+    double collision = 0;
     for(int i = 0; i<m_spikes.size(); i++){
-        glm::dvec2 temp = AABB::intersect(m_spikes[i].m_aabb, m_spikes[i].m_pos, player->getHitbox(), player->getPos());
-        if(temp != glm::dvec2(0, 0)){
-            collision = temp;
+        bool temp = Collisions::intersectBoolAABBAABB(m_spikes[i].m_aabb, m_spikes[i].m_pos, player->getHitbox(), player->getPos());
+        if(temp){
+            player->kill();
         }
     }
-    player->resolveCollision(collision);
 
     for(int i = 0; i<m_portals.size(); i++){
-        glm::dvec2 temp = AABB::intersect(m_portals[i].m_aabb, m_portals[i].m_pos, player->getHitbox(), player->getPos());
-        if(temp != glm::dvec2(0, 0)){
+        bool temp = Collisions::intersectBoolAABBAABB(m_portals[i].m_aabb, m_portals[i].m_pos, player->getHitbox(), player->getPos());
+        if(temp){
             player->portalInteraction(m_portals[i]);
         }
     }
 
     for(int i = 0; i<m_orbs.size(); i++){
-        bool temp = AABB::intersectBool(m_orbs[i].m_aabb, m_orbs[i].m_pos, player->getHitbox(), player->getPos());
+        bool temp = Collisions::intersectBoolAABBAABB(m_orbs[i].m_aabb, m_orbs[i].m_pos, player->getHitbox(), player->getPos());
         if(temp){
             if(player->orbInteraction(m_orbs[i])){
                 break;
             }
         }
     }
+
+    player->setGrounded(false);
+
+    for(int i = 0; i<m_blocks.size(); i++){
+        CollisionData temp = Collisions::intersectDiscreteAABBAABB(player->getHitbox(), player->getPos(), m_blocks[i].m_aabb, m_blocks[i].m_pos);
+        if(temp.m_kill){
+            std::cout<<"Block death"<<std::endl;
+            player->kill();
+        }
+        else if(temp.m_collision){
+            player->resolveCollision(temp.m_yCorrected);
+        }
+    }
+
+    CollisionData tempGround = Collisions::intersectDiscreteAABBXAP(player->getHitbox(), player->getPos(), -4.5, true);
+    if(tempGround.m_collision){
+        player->resolveCollision(tempGround.m_yCorrected);
+    }
 }
 
-void Level::draw(std::shared_ptr<Player> player, glm::vec2 screenDim){
+void Level::draw(std::shared_ptr<Player> player){
     glUseProgram(m_levelShader);
     glUniform2f(glGetUniformLocation(m_levelShader, "playerPos"), player->getPos().x, player->getPos().y);
-    glUniform2f(glGetUniformLocation(m_levelShader, "screenDim"), screenDim.x, screenDim.y);
+    glUniform2f(glGetUniformLocation(m_levelShader, "screenDim"), m_settings->m_width, m_settings->m_height);
+    glUniform1f(glGetUniformLocation(m_levelShader, "yUnits"), m_settings->m_yUnits);
     glBindVertexArray(m_spikeVao);
     for(int i = 0; i<m_spikes.size(); i++){
         glUniform2f(glGetUniformLocation(m_levelShader, "objPos"), m_spikes[i].m_pos.x, m_spikes[i].m_pos.y);
@@ -153,6 +147,14 @@ void Level::draw(std::shared_ptr<Player> player, glm::vec2 screenDim){
         glUniform1i(glGetUniformLocation(m_levelShader, "flipX"), m_spikes[i].m_flipX);
         glUniform1i(glGetUniformLocation(m_levelShader, "flipY"), m_spikes[i].m_flipY);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+    }
+    glBindVertexArray(m_blockVao);
+    for(int i = 0; i<m_blocks.size(); i++){
+        glUniform2f(glGetUniformLocation(m_levelShader, "objPos"), m_blocks[i].m_pos.x, m_blocks[i].m_pos.y);
+        glUniform3f(glGetUniformLocation(m_levelShader, "objColor"), 0.75, 0.75, 0.75);
+        glUniform1i(glGetUniformLocation(m_levelShader, "flipX"), m_blocks[i].m_flipX);
+        glUniform1i(glGetUniformLocation(m_levelShader, "flipY"), m_blocks[i].m_flipY);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
     }
     glBindVertexArray(m_portalVao);
     for(int i = 0; i<m_portals.size(); i++){

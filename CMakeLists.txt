@@ -27,21 +27,26 @@ add_executable(${PROJECT_NAME}
     main.cpp
     window.cpp
     core.cpp
-    camera.cpp
     player.cpp
     level.cpp
     aabb.cpp
     oobb.cpp
+    gametextures.cpp
+    wavetrail.cpp
+    collisions.cpp
 
     window.h
     core.h
     shaderloader.h
-    camera.h
     debug.h
     player.h
     level.h
     aabb.h
     oobb.h
+    gametextures.h
+    wavetrail.h
+    collisions.h
+    settings.h
 
     External/stb_image.h
     External/stb_image_write.h

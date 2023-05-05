@@ -5,9 +5,10 @@
 
 #include <iostream>
 #include <memory>
-#include "camera.h"
 #include "player.h"
 #include "level.h"
+#include "gametextures.h"
+#include "settings.h"
 
 #include <set>
 
@@ -26,16 +27,10 @@ public:
     void framebufferResizeEvent(int width, int height);
 
 private:
-    GLuint m_shader;
-    std::unique_ptr<Camera> m_camera;
     std::shared_ptr<Player> m_player;
     std::shared_ptr<Level> m_level;
-    glm::ivec2 m_screenResolution;
+    std::shared_ptr<GameTextures> m_gameTextures;
+    std::shared_ptr<Settings> m_settings;
 
-    bool m_mouseDown = false;
-    std::set<int> m_keysDown = std::set<int>();
-
-    float m_unitsY = 4.8;
-
-    double m_dtMultiplier = 7;
+    double m_dtMultiplier = 10;
 };

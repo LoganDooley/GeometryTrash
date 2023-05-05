@@ -5,11 +5,24 @@
 #include <memory>
 #include <vector>
 #include "player.h"
-#include "aabb.h"
+#include "collisions.h"
 
 struct Spike{
     Spike(glm::dvec2 pos, bool flipX, bool flipY):
         m_pos(pos), m_flipX(flipX), m_flipY(flipY), m_aabb(AABB(glm::dvec2(-0.1, -0.1), glm::dvec2(0.1, 0.3), flipX, flipY))
+    {
+
+    }
+
+    glm::dvec2 m_pos;
+    bool m_flipX;
+    bool m_flipY;
+    AABB m_aabb;
+};
+
+struct Block{
+    Block(glm::dvec2 pos, bool flipX, bool flipY):
+        m_pos(pos), m_flipX(flipX), m_flipY(flipY), m_aabb(AABB(glm::dvec2(-0.5, -0.5), glm::dvec2(0.5, 0.5), flipX, flipY))
     {
 
     }
@@ -107,21 +120,26 @@ struct Orb{
 class Level
 {
 public:
-    Level();
+    Level(std::shared_ptr<Settings> settings);
     ~Level();
 
     void checkCollisions(std::shared_ptr<Player> player);
-    void draw(std::shared_ptr<Player> player, glm::vec2 screenDim);
+    void draw(std::shared_ptr<Player> player);
 
 private:
     std::vector<Spike> m_spikes;
+    std::vector<Block> m_blocks;
     std::vector<Portal> m_portals;
     std::vector<Orb> m_orbs;
     GLuint m_levelShader;
     GLuint m_spikeVao;
     GLuint m_spikeVbo;
+    GLuint m_blockVao;
+    GLuint m_blockVbo;
     GLuint m_portalVao;
     GLuint m_portalVbo;
     GLuint m_orbVao;
     GLuint m_orbVbo;
+
+    std::shared_ptr<Settings> m_settings;
 };
