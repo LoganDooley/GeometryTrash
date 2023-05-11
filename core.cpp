@@ -3,7 +3,7 @@
 #include "debug.h"
 
 Core::Core(int width, int height):
-    m_settings(std::make_shared<Settings>(width, height, 4.5, 0))
+    m_settings(std::make_shared<Settings>(width, height, 165, 0))
 {
     glViewport(0, 0, width, height);
     Debug::checkGLError();
@@ -19,9 +19,8 @@ Core::~Core(){
 }
 
 int Core::update(double seconds){
-    m_settings->m_time += seconds;
-    m_player->update(seconds * m_dtMultiplier);
-    m_level->checkCollisions(m_player);
+    m_player->update(seconds);
+    m_player->collideWithLevel(m_level);
     return 0;
 }
 
@@ -36,12 +35,18 @@ int Core::draw(){
 }
 
 void Core::keyEvent(int key, int action){
-    if(key == GLFW_KEY_SPACE || key == GLFW_KEY_UP){
+    if(key == GLFW_KEY_SPACE || key == GLFW_KEY_UP || key == GLFW_MOUSE_BUTTON_LEFT){
         if(action == GLFW_PRESS){
-            m_player->setInput(true);
+            m_player->addInputs(1);
+            m_player->setInputDown(true);
+            m_inputsDown.insert(key);
         }
         else if(action == GLFW_RELEASE){
-            m_player->setInput(false);
+            m_player->removeInputs(1);
+            m_inputsDown.erase(key);
+            if(m_inputsDown.size() == 0){
+                m_player->setInputDown(false);
+            }
         }
     }
 }

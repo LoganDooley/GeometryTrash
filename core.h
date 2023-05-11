@@ -32,5 +32,5 @@ private:
     std::shared_ptr<GameTextures> m_gameTextures;
     std::shared_ptr<Settings> m_settings;
 
-    double m_dtMultiplier = 10;
+    std::set<int> m_inputsDown = std::set<int>();
 };

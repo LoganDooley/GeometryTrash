@@ -29,11 +29,9 @@ add_executable(${PROJECT_NAME}
     core.cpp
     player.cpp
     level.cpp
-    aabb.cpp
-    oobb.cpp
     gametextures.cpp
     wavetrail.cpp
-    collisions.cpp
+    collision.cpp
 
     window.h
     core.h
@@ -41,11 +39,10 @@ add_executable(${PROJECT_NAME}
     debug.h
     player.h
     level.h
-    aabb.h
-    oobb.h
+    colliders.h
     gametextures.h
     wavetrail.h
-    collisions.h
+    collision.h
     settings.h
 
     External/stb_image.h

@@ -12,10 +12,10 @@ uniform bool flipY;
 void main() {
     vec2 newVertPos = vertPos;
     if(flipX){
-        newVertPos.x = -newVertPos.x;
+        newVertPos.y = -newVertPos.y;
     }
     if(flipY){
-        newVertPos.y = -newVertPos.y;
+        newVertPos.x = -newVertPos.x;
     }
     vec2 screenPos = (objPos + newVertPos - vec2(playerPos.x, 0))/vec2((yUnits * screenDim.x)/screenDim.y, yUnits);
     gl_Position = vec4(screenPos, 0, 1);

@@ -1,13 +1,14 @@
 #include "level.h"
 #include "debug.h"
+#include "player.h"
 
 Level::Level(std::shared_ptr<Settings> settings):
     m_settings(settings)
 {
     GLdouble spikeData[6] = {
-        -0.5, -0.5,
-        0.5, -0.5,
-        0, 0.5,
+        -15, -15,
+        15, -15,
+        0, 15
     };
 
     glGenVertexArrays(1, &m_spikeVao);
@@ -20,13 +21,45 @@ Level::Level(std::shared_ptr<Settings> settings):
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    GLdouble slope1Data[6] = {
+        -15, -15,
+        15, -15,
+        15, 15
+    };
+
+    glGenVertexArrays(1, &m_slope1Vao);
+    glBindVertexArray(m_slope1Vao);
+    glGenBuffers(1, &m_slope1Vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, m_slope1Vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(slope1Data), slope1Data, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(GLdouble), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    GLdouble slope2Data[6] = {
+        -30, -15,
+        30, -15,
+        30, 15
+    };
+
+    glGenVertexArrays(1, &m_slope2Vao);
+    glBindVertexArray(m_slope2Vao);
+    glGenBuffers(1, &m_slope2Vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, m_slope2Vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(slope2Data), slope2Data, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(GLdouble), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
     GLdouble blockData[12] = {
-        -0.5, -0.5,
-        0.5, -0.5,
-        0.5, 0.5,
-        0.5, 0.5,
-        -0.5, 0.5,
-        -0.5, -0.5
+        -15, -15,
+        15, -15,
+        15, 15,
+        15, 15,
+        -15, 15,
+        -15, -15
     };
 
     glGenVertexArrays(1, &m_blockVao);
@@ -40,12 +73,12 @@ Level::Level(std::shared_ptr<Settings> settings):
     glBindVertexArray(0);
 
     GLdouble portalData[12] = {
-        -0.5, -1.5,
-        0.5, -1.5,
-        0.5, 1.5,
-        0.5, 1.5,
-        -0.5, 1.5,
-        -0.5, -1.5
+        -15, -45,
+        15, -45,
+        15, 45,
+        15, 45,
+        -15, 45,
+        -15, -45
     };
 
     glGenVertexArrays(1, &m_portalVao);
@@ -59,12 +92,12 @@ Level::Level(std::shared_ptr<Settings> settings):
     glBindVertexArray(0);
 
     GLdouble orbData[12] = {
-        -0.5, -0.5,
-        0.5, -0.5,
-        0.5, 0.5,
-        0.5, 0.5,
-        -0.5, 0.5,
-        -0.5, -0.5
+        -15, -15,
+        15, -15,
+        15, 15,
+        15, 15,
+        -15, 15,
+        -15, -15
     };
 
     glGenVertexArrays(1, &m_orbVao);
@@ -77,62 +110,44 @@ Level::Level(std::shared_ptr<Settings> settings):
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    GLdouble padData[12] = {
+        -15, -15,
+        15, -15,
+        15, -8,
+        15, -8,
+        -15, -8,
+        -15, -15
+    };
+
+    glGenVertexArrays(1, &m_padVao);
+    glBindVertexArray(m_padVao);
+    glGenBuffers(1, &m_padVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, m_padVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(padData), padData, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(GLdouble), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
     m_levelShader = ShaderLoader::createShaderProgram("Shaders/level.vert", "Shaders/level.frag");
     Debug::checkGLError();
 
-    //m_portals.emplace_back(glm::dvec2(5, -3), PortalType::Wave, false, false);
-    m_spikes.emplace_back(glm::dvec2(8, -4), false, false);
-    m_spikes.emplace_back(glm::dvec2(9, -4), false, false);
-    m_blocks.emplace_back(glm::dvec2(10, -4), false, false);
+    m_spikes.emplace_back(glm::dvec2(300, -120), false, false);
+    m_spikes.emplace_back(glm::dvec2(330, -120), false, false);
+    m_spikes.emplace_back(glm::dvec2(360, -120), false, false);
+
+    m_portals.emplace_back(glm::dvec2(450, -90), PortalType::MiniSize, false, false);
+
+    m_spikes.emplace_back(glm::dvec2(510, -120), false, false);
+    m_spikes.emplace_back(glm::dvec2(540, -120), false, false);
+
+    m_portals.emplace_back(glm::dvec2(630, -90), PortalType::Ship, false, false);
+
 }
 
 Level::~Level()
 {
 
-}
-
-void Level::checkCollisions(std::shared_ptr<Player> player){
-    double collision = 0;
-    for(int i = 0; i<m_spikes.size(); i++){
-        bool temp = Collisions::intersectBoolAABBAABB(m_spikes[i].m_aabb, m_spikes[i].m_pos, player->getHitbox(), player->getPos());
-        if(temp){
-            player->kill();
-        }
-    }
-
-    for(int i = 0; i<m_portals.size(); i++){
-        bool temp = Collisions::intersectBoolAABBAABB(m_portals[i].m_aabb, m_portals[i].m_pos, player->getHitbox(), player->getPos());
-        if(temp){
-            player->portalInteraction(m_portals[i]);
-        }
-    }
-
-    for(int i = 0; i<m_orbs.size(); i++){
-        bool temp = Collisions::intersectBoolAABBAABB(m_orbs[i].m_aabb, m_orbs[i].m_pos, player->getHitbox(), player->getPos());
-        if(temp){
-            if(player->orbInteraction(m_orbs[i])){
-                break;
-            }
-        }
-    }
-
-    player->setGrounded(false);
-
-    for(int i = 0; i<m_blocks.size(); i++){
-        CollisionData temp = Collisions::intersectDiscreteAABBAABB(player->getHitbox(), player->getPos(), m_blocks[i].m_aabb, m_blocks[i].m_pos);
-        if(temp.m_kill){
-            std::cout<<"Block death"<<std::endl;
-            player->kill();
-        }
-        else if(temp.m_collision){
-            player->resolveCollision(temp.m_yCorrected);
-        }
-    }
-
-    CollisionData tempGround = Collisions::intersectDiscreteAABBXAP(player->getHitbox(), player->getPos(), -4.5, true);
-    if(tempGround.m_collision){
-        player->resolveCollision(tempGround.m_yCorrected);
-    }
 }
 
 void Level::draw(std::shared_ptr<Player> player){
@@ -156,6 +171,22 @@ void Level::draw(std::shared_ptr<Player> player){
         glUniform1i(glGetUniformLocation(m_levelShader, "flipY"), m_blocks[i].m_flipY);
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
+    glBindVertexArray(m_slope1Vao);
+    for(int i = 0; i<m_slope1s.size(); i++){
+        glUniform2f(glGetUniformLocation(m_levelShader, "objPos"), m_slope1s[i].m_pos.x, m_slope1s[i].m_pos.y);
+        glUniform3f(glGetUniformLocation(m_levelShader, "objColor"), 0.75, 0.75, 0.75);
+        glUniform1i(glGetUniformLocation(m_levelShader, "flipX"), m_slope1s[i].m_flipX);
+        glUniform1i(glGetUniformLocation(m_levelShader, "flipY"), m_slope1s[i].m_flipY);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+    }
+    glBindVertexArray(m_slope2Vao);
+    for(int i = 0; i<m_slope2s.size(); i++){
+        glUniform2f(glGetUniformLocation(m_levelShader, "objPos"), m_slope2s[i].m_pos.x, m_slope2s[i].m_pos.y);
+        glUniform3f(glGetUniformLocation(m_levelShader, "objColor"), 0.75, 0.75, 0.75);
+        glUniform1i(glGetUniformLocation(m_levelShader, "flipX"), m_slope2s[i].m_flipX);
+        glUniform1i(glGetUniformLocation(m_levelShader, "flipY"), m_slope2s[i].m_flipY);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+    }
     glBindVertexArray(m_portalVao);
     for(int i = 0; i<m_portals.size(); i++){
         glUniform2f(glGetUniformLocation(m_levelShader, "objPos"), m_portals[i].m_pos.x, m_portals[i].m_pos.y);
@@ -168,8 +199,16 @@ void Level::draw(std::shared_ptr<Player> player){
     for(int i = 0; i<m_orbs.size(); i++){
         glUniform2f(glGetUniformLocation(m_levelShader, "objPos"), m_orbs[i].m_pos.x, m_orbs[i].m_pos.y);
         glUniform3f(glGetUniformLocation(m_levelShader, "objColor"), m_orbs[i].color().x, m_orbs[i].color().y, m_orbs[i].color().z);
-        glUniform1i(glGetUniformLocation(m_levelShader, "flipX"), m_portals[i].m_flipX);
-        glUniform1i(glGetUniformLocation(m_levelShader, "flipY"), m_portals[i].m_flipY);
+        glUniform1i(glGetUniformLocation(m_levelShader, "flipX"), m_orbs[i].m_flipX);
+        glUniform1i(glGetUniformLocation(m_levelShader, "flipY"), m_orbs[i].m_flipY);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+    glBindVertexArray(m_padVao);
+    for(int i = 0; i<m_pads.size(); i++){
+        glUniform2f(glGetUniformLocation(m_levelShader, "objPos"), m_pads[i].m_pos.x, m_pads[i].m_pos.y);
+        glUniform3f(glGetUniformLocation(m_levelShader, "objColor"), m_pads[i].color().x, m_pads[i].color().y, m_pads[i].color().z);
+        glUniform1i(glGetUniformLocation(m_levelShader, "flipX"), m_pads[i].m_flipX);
+        glUniform1i(glGetUniformLocation(m_levelShader, "flipY"), m_pads[i].m_flipY);
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
     glBindVertexArray(0);
