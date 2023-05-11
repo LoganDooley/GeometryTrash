@@ -32,6 +32,8 @@ add_executable(${PROJECT_NAME}
     gametextures.cpp
     wavetrail.cpp
     collision.cpp
+    audiosystem.cpp
+    song.cpp
 
     window.h
     core.h
@@ -44,9 +46,13 @@ add_executable(${PROJECT_NAME}
     wavetrail.h
     collision.h
     settings.h
+    audiosystem.h
+    song.h
 
     External/stb_image.h
     External/stb_image_write.h
+
+    External/miniaudio.h
 )
 
 # Specifies libraries to be linked (Qt components, glew, etc)

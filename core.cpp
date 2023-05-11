@@ -10,6 +10,7 @@ Core::Core(int width, int height):
     m_player = std::make_shared<Player>(m_settings);
     m_level = std::make_shared<Level>(m_settings);
     m_gameTextures = std::make_shared<GameTextures>();
+    m_audioSystem = std::make_shared<AudioSystem>();
 
     glEnable(GL_BLEND);
 }

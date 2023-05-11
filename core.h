@@ -9,6 +9,7 @@
 #include "level.h"
 #include "gametextures.h"
 #include "settings.h"
+#include "audiosystem.h"
 
 #include <set>
 
@@ -31,6 +32,7 @@ private:
     std::shared_ptr<Level> m_level;
     std::shared_ptr<GameTextures> m_gameTextures;
     std::shared_ptr<Settings> m_settings;
+    std::shared_ptr<AudioSystem> m_audioSystem;
 
     std::set<int> m_inputsDown = std::set<int>();
 };

@@ -5,6 +5,8 @@ Window::Window(){
 }
 
 Window::~Window(){
+    ma_engine_uninit(&engine);
+
     if(m_coreAllocated){
         delete(m_core);
     }

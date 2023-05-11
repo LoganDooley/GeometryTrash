@@ -27,4 +27,7 @@ private:
     Core* m_core;
     bool m_coreAllocated = false;
     const double m_secPerUpdate = 1.0/60;
+
+    ma_result result;
+    ma_engine engine;
 };
